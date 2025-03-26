@@ -23,7 +23,12 @@ def initialize_model():
     
     print("Initializing model with config:", model_config)
     llm = Llama(**model_config)
-    print("VRAM Usage:", llm._ctx.mem_usage())  # Add memory usage report
+    
+    # Add proper memory reporting
+    print("\n=== GPU MEMORY USAGE ===")
+    print(f"Total VRAM used: {llm._ctx.model.state().get('total_vram_used_mb', 0):.2f} MB")
+    print(f"Offloaded layers: {llm._ctx.model.state().get('offloaded_layers', 0)}")
+    print(f"Compute buffer size: {llm._ctx.model.state().get('compute_buffer_size_mb', 0):.2f} MB\n")
 
 def process_input(job):
     job_input = job["input"]
