@@ -23,9 +23,9 @@ COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 ENV MODEL_PATH=/runpod-volume/Midnight-Miqu-70B-v1.5.Q4_K_M.gguf
-ENV N_CTX=4096
+ENV N_CTX=2048
 ENV N_GPU_LAYERS=79
-ENV N_BATCH=4096
+ENV N_BATCH=1024
 ENV GPU_SPLIT=100
 ENV MAIN_GPU=0
 ENV GGML_CUBLAS=1
