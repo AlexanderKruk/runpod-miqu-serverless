@@ -11,16 +11,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \
     cmake \
- && python3 -m pip install --upgrade pip \
- && rm -rf /var/lib/apt/lists/*
+&& python3 -m pip install --upgrade pip \
+&& rm -rf /var/lib/apt/lists/*
 
 # --- Set Environment Variables for CUDA ---
-# Explicitly point to the CUDA installation within the base image
 ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=/usr/local/cuda/bin:${PATH}
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH}
-# Also set CMAKE_ARGS for building from source (fallback)
-ENV CMAKE_ARGS="-DLLAMA_CUBLAS=on"
+
+# -->> UPDATE THIS LINE <<--
+# Use LLAMA_CUDA instead of LLAMA_CUBLAS
+# Add -DCMAKE_CUDA_ARCHITECTURES=86 to specify the target GPU architecture (Ampere)
+ENV CMAKE_ARGS="-DLLAMA_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=86"
 ENV FORCE_CMAKE=1
 # --- End Environment Variables ---
 
@@ -31,7 +33,7 @@ ARG CUDA_VERSION=cu121
 # --- Install llama-cpp-python ---
 RUN python3 -m pip uninstall llama-cpp-python -y || echo "llama-cpp-python not previously installed"
 RUN python3 -m pip install wheel
-# Add --verbose to pip install for more detailed logs during this step
+# Keep --verbose for now, useful if it still fails
 RUN python3 -m pip install llama-cpp-python==${LLAMA_CPP_PYTHON_VERSION} \
     --force-reinstall --no-cache-dir --verbose \
     --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/${CUDA_VERSION}
