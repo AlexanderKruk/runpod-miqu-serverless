@@ -1,3 +1,2 @@
 #!/bin/bash
-
-python -u handler.py
+python3 -u handler.py
