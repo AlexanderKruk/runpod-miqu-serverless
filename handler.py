@@ -19,7 +19,10 @@ def initialize_model():
         n_batch=512,
         use_mmap=True,
         use_mlock=False,
-        offload_kqv=True
+        offload_kqv=True,
+        main_gpu=0,  # Explicitly specify main GPU
+        tensor_split=[100],  # 100% of model on first GPU
+        verbose=True  # Add verbose logging
     )
 
 def process_input(job):
