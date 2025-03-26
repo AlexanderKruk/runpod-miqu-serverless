@@ -6,39 +6,38 @@ llm = None
 
 def initialize_model():
     global llm
-    model_path = os.environ["MODEL_PATH"]
-    n_ctx = int(os.environ.get("N_CTX", 4096))
-    n_threads = int(os.environ.get("N_THREADS", 8))
-    n_gpu_layers = int(os.environ.get("N_GPU_LAYERS", 83))
-
-    llm = Llama(
-        model_path=model_path,
-        n_ctx=n_ctx,
-        n_threads=n_threads,
-        n_gpu_layers=n_gpu_layers,
-        n_batch=512,
-        use_mmap=True,
-        use_mlock=False,
-        offload_kqv=True,
-        main_gpu=0,  # Explicitly specify main GPU
-        tensor_split=[100],  # 100% of model on first GPU
-        verbose=True  # Add verbose logging
-    )
+    model_config = {
+        "model_path": os.environ["MODEL_PATH"],
+        "n_ctx": int(os.environ["N_CTX"]),
+        "n_gpu_layers": int(os.environ["N_GPU_LAYERS"]),
+        "n_batch": int(os.environ["N_BATCH"]),
+        "main_gpu": int(os.environ["MAIN_GPU"]),
+        "tensor_split": [float(os.environ["GPU_SPLIT"])],
+        "n_threads": 8,
+        "verbose": True,
+        "offload_kqv": True,
+        "mul_mat_q": True,
+        "use_mlock": False,
+        "use_mmap": True
+    }
+    
+    print("Initializing model with config:", model_config)
+    llm = Llama(**model_config)
+    print("VRAM Usage:", llm._ctx.mem_usage())  # Add memory usage report
 
 def process_input(job):
     job_input = job["input"]
-    prompt = job_input.get("prompt", "")
-    max_tokens = job_input.get("max_tokens", 200)
-    temperature = job_input.get("temperature", 0.7)
-    
-    output = llm.create_completion(
-        prompt,
-        max_tokens=max_tokens,
-        temperature=temperature,
-        stream=False
-    )
-    
-    return output["choices"][0]["text"]
+    try:
+        result = llm.create_completion(
+            prompt=job_input["prompt"],
+            max_tokens=job_input.get("max_tokens", 200),
+            temperature=job_input.get("temperature", 0.7),
+            stream=False
+        )
+        return result["choices"][0]["text"]
+    except Exception as e:
+        return {"error": str(e)}
 
-initialize_model()
-runpod.serverless.start({"handler": process_input})
+if __name__ == "__main__":
+    initialize_model()
+    runpod.serverless.start({"handler": process_input})
