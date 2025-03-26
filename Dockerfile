@@ -22,7 +22,7 @@ RUN python3 -m pip install --upgrade pip
 # This is the KEY step for faster builds and avoiding local CUDA compilation issues.
 # 1. Choose a specific llama-cpp-python version (check GitHub releases for latest)
 #    https://github.com/abetlen/llama-cpp-python/releases
-ARG LLAMA_CPP_PYTHON_VERSION=0.2.79 # Example: Use a recent version known to work well
+ARG LLAMA_CPP_PYTHON_VERSION=0.2.79
 
 # 2. Specify the CUDA version matching the base image (cu121 for CUDA 12.1)
 ARG CUDA_VERSION=cu121
